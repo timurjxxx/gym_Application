@@ -1,0 +1,12 @@
+resilience4j:
+  circuit breaker:
+    instances:
+      TrainerWorkLoadService :
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20000
+        permitted-number-of-calls-in-half-open-state: 1
+        automatic-transition-from-open-to-half-open-enabled: true
+        minimum-number-of-calls: 2
+        sliding-window-size: 2
+        sliding-window-type: COUNT_BASED

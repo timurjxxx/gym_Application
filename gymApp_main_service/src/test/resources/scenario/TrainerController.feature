@@ -17,3 +17,7 @@ Feature: Trainer Controller
 
 
 
+  Scenario: Get trainer profile with invalid username
+    Given an invalid username
+    When the get trainer profile request with invalid username is sent
+    Then the API should return a not found response

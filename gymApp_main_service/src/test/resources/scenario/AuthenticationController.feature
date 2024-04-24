@@ -20,3 +20,5 @@ Feature: Authentication API Tests
     When the change password request is sent to the API
     Then the API should return a successful response
 
+
+

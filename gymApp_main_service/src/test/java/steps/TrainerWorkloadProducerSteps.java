@@ -48,7 +48,7 @@ public class TrainerWorkloadProducerSteps {
     @Given("an invalid training or action type")
     public void an_invalid_training_or_action_type() {
         training = null;
-        action = null;   // Setting action to null to simulate invalid action
+        action = null;
     }
 
     @When("the update workload request is sent to the ActiveMQ queue")
@@ -71,7 +71,7 @@ public class TrainerWorkloadProducerSteps {
 
     @When("the request is created")
     public void the_request_is_created() {
-        workloadProducer = new TrainerWorkloadProducer(null, null, null); // Mock dependencies not used in this step
+        workloadProducer = new TrainerWorkloadProducer(null, null, null);
         createdRequest = workloadProducer.createRequest(training, action);
     }
 

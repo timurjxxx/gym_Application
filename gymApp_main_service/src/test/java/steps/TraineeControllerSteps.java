@@ -1,6 +1,7 @@
 package steps;
 
 import com.gypApp_main.controller.TraineeController;
+import com.gypApp_main.exception.UserNotFoundException;
 import com.gypApp_main.model.Trainee;
 import com.gypApp_main.model.User;
 import com.gypApp_main.service.TraineeService;
@@ -17,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 public class TraineeControllerSteps {
@@ -30,8 +33,9 @@ public class TraineeControllerSteps {
     private ResponseEntity<String> responseString;
 
     private String traineeUsername;
-    private Trainee updatedTrainee;
+    private Trainee updatedTrainee ;
     private Trainee trainee;
+    private String invalidUsername;
 
     public TraineeControllerSteps() {
         MockitoAnnotations.openMocks(this);
@@ -46,6 +50,7 @@ public class TraineeControllerSteps {
     public void aTraineeUsernameForDeleting() {
         trainee = new Trainee();
         User user = new User();
+        user.setFirstName("testname");
         user.setUserName("testUsername");
         trainee.setUser(user);
     }
@@ -54,26 +59,32 @@ public class TraineeControllerSteps {
     public void aTraineeUsernameAndUpdatedTraineeDetails() {
         traineeUsername = "testTrainee";
         updatedTrainee = new Trainee();
-        // Set updated details for the trainee
+        User user = new User();
+        user.setUserName("username");
         updatedTrainee.setAddress("Updated Address");
+        updatedTrainee.setUser(user);
         updatedTrainee.setTrainers(Collections.emptySet());
-        // Mock the behavior of traineeService to update the trainee profile
-        Mockito.when(traineeService.updateTrainee(traineeUsername, updatedTrainee));
+        when(traineeService.updateTrainee(traineeUsername, updatedTrainee)).thenReturn(updatedTrainee);
+
     }
 
     @When("the get trainee profile request is sent")
     public void theGetTraineeProfileRequestIsSent() {
-        // Mock the behavior of traineeService to return a dummy trainee
         Trainee dummyTrainee = new Trainee();
         when(traineeService.selectTraineeByUserName(traineeUsername)).thenReturn(dummyTrainee);
 
         ResponseEntity<String> response = traineeController.getTraineeProfile(traineeUsername);
 
-        Assertions.assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCodeValue());
     }
 
     @When("the update trainee profile request is sent")
     public void theUpdateTraineeProfileRequestIsSent() {
+        assertNotNull(traineeUsername);
+        assertNotNull(updatedTrainee);
+
+        when(traineeService.updateTrainee(traineeUsername, updatedTrainee)).thenReturn(updatedTrainee);
+
         responseString = traineeController.updateTraineeProfile(traineeUsername, updatedTrainee);
 
     }
@@ -82,7 +93,6 @@ public class TraineeControllerSteps {
     public void theDeleteTraineeProfileRequestIsSent() {
         Mockito.doNothing().when(traineeService).deleteTraineeByUserName(traineeUsername);
 
-        // Invoke the endpoint to delete the trainee profile
         response = traineeController.deleteTraineeProfile(traineeUsername);
     }
 
@@ -92,14 +102,34 @@ public class TraineeControllerSteps {
 
     @Then("the trainee profile should be updated")
     public void theTraineeProfileShouldBeUpdated() {
+        Trainee updatedTrainee = new Trainee();
+        updatedTrainee = traineeService.updateTrainee(traineeUsername, updatedTrainee);
+        assertNotNull(updatedTrainee);
+        assertEquals("Updated Address", updatedTrainee.getAddress());
     }
 
     @Then("the trainee profile should be deleted and return 200")
     public void theTraineeProfileShouldBeDeletedAndReturn200() {
-        // Assert the response
-        Assertions.assertNotNull(response);
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
 
+    @Given("an invalid trainee username")
+    public void anInvalidTraineeUsername() {
+        invalidUsername = "non_existing_username";
+
+    }
+
+    @When("the get trainee profile request with invalid username is sent")
+    public void theGetTraineeProfileRequestWithInvalidUsernameIsSent() {
+        when(traineeService.selectTraineeByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
+        responseString = traineeController.getTraineeProfile(invalidUsername);
+    }
+
+    @Then("the API should return a not found response for trainee")
+    public void theAPIShouldReturnANotFoundResponseForTrainee() {
+        Assertions.assertNotNull(responseString);
+        Assertions.assertEquals(404, responseString.getStatusCodeValue());
+    }
 }

@@ -29,15 +29,15 @@ public class AuthenticationControllerSteps {
 
     private ResponseEntity<?> response;
     @Mock
-    private  AuthService service;
+    private AuthService service;
 
     private LoginRequest loginRequest = new LoginRequest();
     private LoginRequest invalidLoginRequest = new LoginRequest();
     private Trainer trainer = new Trainer();
-    private Trainee trainee= new Trainee();
+    private Trainee trainee = new Trainee();
     private ChangeLoginRequest changeLoginRequest = new ChangeLoginRequest();
 
-    public  AuthenticationControllerSteps() {
+    public AuthenticationControllerSteps() {
         MockitoAnnotations.openMocks(this);
     }
 
@@ -85,13 +85,11 @@ public class AuthenticationControllerSteps {
 
     @When("the trainee creation request is sent to the API")
     public void whenTraineeCreationRequestSentToAPI() {
-        // Отправка запроса на контроллер аутентификации
         response = authenticationController.createTrainee(trainee);
     }
 
     @When("the trainer creation request is sent to the API")
     public void whenTrainerCreationRequestSentToAPI() {
-        // Отправка запроса на контроллер аутентификации
         response = authenticationController.createTrainer(trainer);
     }
 
@@ -104,7 +102,8 @@ public class AuthenticationControllerSteps {
     public void thenApiShouldReturnSuccessfulResponse() {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-//////////////////
+
+    //////////////////
     @Given("an invalid request")
     public void anInvalidRequest() {
         invalidLoginRequest.setUsername("testUsername");

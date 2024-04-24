@@ -45,7 +45,6 @@ public class TrainingControllerSteps {
 
     @Given("a valid training")
     public void givenValidTraining() {
-        // Initialize a valid training object
         validTraining = new Training();
         Trainer trainer = new Trainer();
         Trainee trainee = new Trainee();
@@ -131,4 +130,6 @@ public class TrainingControllerSteps {
     public void thenTrainerTrainingsReturned() {
         Assertions.assertNotNull(trainerTrainingsResponse);
     }
+    ///////////////
+
 }

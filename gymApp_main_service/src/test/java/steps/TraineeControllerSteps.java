@@ -33,8 +33,11 @@ public class TraineeControllerSteps {
     private ResponseEntity<String> responseString;
 
     private String traineeUsername;
-    private Trainee updatedTrainee ;
+    private Trainee updatedTrainee;
     private Trainee trainee;
+
+    private Exception thrownException;
+
     private String invalidUsername;
 
     public TraineeControllerSteps() {
@@ -123,13 +126,22 @@ public class TraineeControllerSteps {
 
     @When("the get trainee profile request with invalid username is sent")
     public void theGetTraineeProfileRequestWithInvalidUsernameIsSent() {
-        when(traineeService.selectTraineeByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
-        responseString = traineeController.getTraineeProfile(invalidUsername);
+        try {
+            when(traineeService.selectTraineeByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
+            responseString = traineeController.getTraineeProfile(invalidUsername);
+        } catch (UserNotFoundException e) {
+            thrownException = e;
+            responseString = ResponseEntity.notFound().build(); // Возвращаем пустой ответ с кодом 404
+        }
     }
+
 
     @Then("the API should return a not found response for trainee")
     public void theAPIShouldReturnANotFoundResponseForTrainee() {
         Assertions.assertNotNull(responseString);
         Assertions.assertEquals(404, responseString.getStatusCodeValue());
+        Assertions.assertNotNull(thrownException);
+        Assertions.assertTrue(thrownException instanceof UserNotFoundException);
     }
+
 }

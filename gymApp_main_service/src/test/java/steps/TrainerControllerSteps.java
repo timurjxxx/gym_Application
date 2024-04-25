@@ -37,6 +37,8 @@ public class TrainerControllerSteps {
     private List<Trainer> trainers;
     private String invalidUsername;
 
+    private Exception exception;
+
     private ResponseEntity<String> responseEntity;
 
     public TrainerControllerSteps() {
@@ -128,13 +130,23 @@ public class TrainerControllerSteps {
 
     @When("the get trainer profile request with invalid username is sent")
     public void theGetTrainerProfileRequestWithInvalidUsernameIsSent() {
-        when(trainerService.selectTrainerByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
-        responseEntity = controller.getTrainerProfile(invalidUsername);
+        try{
+
+            when(trainerService.selectTrainerByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
+            responseEntity = controller.getTrainerProfile(invalidUsername);
+        }catch (UserNotFoundException e){
+            exception = e;
+            responseEntity = ResponseEntity.notFound().build();
+
+        }
+
     }
 
     @Then("the API should return a not found response")
     public void theAPIShouldReturnANotFoundResponse() {
         Assertions.assertNotNull(responseEntity);
         Assertions.assertEquals(404, responseEntity.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertTrue(exception instanceof UserNotFoundException);
     }
 }

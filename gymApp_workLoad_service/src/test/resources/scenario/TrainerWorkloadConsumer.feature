@@ -10,3 +10,5 @@ Feature: Trainer Workload Consumer
     Given an invalid JSON request
     When the invalid message is received
     Then the message should be sent to the dead-letter queue
+
+

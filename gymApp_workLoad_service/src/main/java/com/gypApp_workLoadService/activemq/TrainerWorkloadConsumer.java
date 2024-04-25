@@ -42,7 +42,7 @@ public class TrainerWorkloadConsumer {
     boolean isValidMessage(TrainerWorkloadRequest request) {
         return request.getTrainingDuration() > 0 && (request.getTrainingDate().getYear() >= LocalDate.now().getYear());
     }
-    void sendToDLQ(String jsonRequest) {
+    public void sendToDLQ(String jsonRequest) {
         try {
             jmsTemplate.convertAndSend(dlqName, jsonRequest);
             log.info("Invalid message sent to dead-letter queue: {}", dlqName);

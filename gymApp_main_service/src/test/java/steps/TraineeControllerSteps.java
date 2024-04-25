@@ -131,7 +131,7 @@ public class TraineeControllerSteps {
             responseString = traineeController.getTraineeProfile(invalidUsername);
         } catch (UserNotFoundException e) {
             thrownException = e;
-            responseString = ResponseEntity.notFound().build(); // Возвращаем пустой ответ с кодом 404
+            responseString = ResponseEntity.notFound().build();
         }
     }
 

@@ -74,9 +74,8 @@ public class TrainerWorkloadControllerSteps {
     ///////////////////////////////////////////////////////////////////////////
     @Given("^an invalid trainer workload request is received$")
     public void anInvalidTrainerWorkloadRequestIsReceived() {
-        // Create an invalid request (for example, missing required fields)
         request = TrainerWorkloadRequest.builder()
-                .trainerUsername(null) // Invalid: Username is null
+                .trainerUsername(null)
                 .trainerFirstname("John")
                 .trainerLastname("Doe")
                 .type(ActionType.ADD)

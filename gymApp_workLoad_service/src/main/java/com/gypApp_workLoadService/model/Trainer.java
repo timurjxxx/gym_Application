@@ -12,7 +12,7 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "trainers")
+@Document(collection ="trainers")
 @Builder
 public class Trainer {
 

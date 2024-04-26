@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'jacoco'
+
 }
 
 group = 'com'
@@ -25,6 +26,8 @@ repositories {
 ext {
 	set('springCloudVersion', "2023.0.1")
 }
+
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
@@ -67,6 +70,8 @@ dependencies {
 	testImplementation 'io.cucumber:cucumber-junit:7.16.1'
 
 
+
+
 }
 
 tasks.named('test') {
@@ -80,6 +85,25 @@ dependencyManagement {
 }
 
 
-tasks.named('test') {
+task createCucumberReportsDir {
+	doLast {
+		file('build/reports/cucumber').mkdirs()
+	}
+}
+task cucumberTest(type: Test) {
+	dependsOn createCucumberReportsDir
 	useJUnitPlatform()
+	include 'src/test/resources/scenario/*.feature'
+	systemProperty 'cucumber.junit.platform.naming.strategy', 'fixed'
+
+	// Форматирование вывода результатов в JSON файл
+	systemProperty 'cucumber.plugin', 'json:build/reports/cucumber/cucumber.json'
+}
+
+
+
+cucumberTest.dependsOn test
+
+jacocoTestReport {
+	dependsOn cucumberTest
 }

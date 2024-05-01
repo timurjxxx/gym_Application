@@ -15,11 +15,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +41,7 @@ public class TrainerControllerSteps {
     private List<Trainer> trainers;
     private String invalidUsername;
 
+    private Trainer updatedTrainer = new Trainer();
     private Exception exception;
 
     private ResponseEntity<String> responseEntity;
@@ -66,8 +71,9 @@ public class TrainerControllerSteps {
     @Then("the trainer profile should be returned")
     public void theTrainerProfileShouldBeReturned() {
         Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(200, responseEntity.getStatusCodeValue());
     }
+
     ///////////////////// 2 scenario
     @Given("a trainer username and updated trainer details")
     public void aTrainerUsernameAndUpdatedTrainerDetails() {
@@ -90,7 +96,7 @@ public class TrainerControllerSteps {
     @Then("the trainer profile should be updated")
     public void theTrainerProfileShouldBeUpdated() {
         Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(200, responseEntity.getStatusCodeValue());
     }
 
     @Given("a username")
@@ -118,11 +124,12 @@ public class TrainerControllerSteps {
     @Then("the list of not assigned active trainers should be returned")
     public void theListOfNotAssignedActiveTrainersShouldBeReturned() {
         Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(200, responseEntity.getStatusCodeValue());
         String responseBody = responseEntity.getBody();
         Assertions.assertNotNull(responseBody);
     }
-//////////////////////////////////////
+
+    //////////////////////////////////////
     @Given("an invalid username")
     public void anInvalidUsername() {
         invalidUsername = "non_existing_username";
@@ -130,11 +137,11 @@ public class TrainerControllerSteps {
 
     @When("the get trainer profile request with invalid username is sent")
     public void theGetTrainerProfileRequestWithInvalidUsernameIsSent() {
-        try{
+        try {
 
             when(trainerService.selectTrainerByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
             responseEntity = controller.getTrainerProfile(invalidUsername);
-        }catch (UserNotFoundException e){
+        } catch (UserNotFoundException e) {
             exception = e;
             responseEntity = ResponseEntity.notFound().build();
 
@@ -145,8 +152,70 @@ public class TrainerControllerSteps {
     @Then("the API should return a not found response")
     public void theAPIShouldReturnANotFoundResponse() {
         Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(404, responseEntity.getStatusCodeValue());
+        assertEquals(404, responseEntity.getStatusCodeValue());
         Assertions.assertNotNull(exception);
-        Assertions.assertTrue(exception instanceof UserNotFoundException);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
+    }
+
+    @Given("invalid  trainer username")
+    public void invalidTrainerUsername() {
+        invalidUsername = "invalid username";
+    }
+
+    @When("the get not assigned active invalid trainers request is sent")
+    public void theGetNotAssignedActiveInvalidTrainersRequestIsSent() {
+        try {
+
+            when(trainerService.selectTrainerByUserName(invalidUsername)).thenThrow(UserNotFoundException.class);
+            responseEntity = controller.getTrainerProfile(invalidUsername);
+        } catch (UserNotFoundException e) {
+            exception = e;
+            responseEntity = ResponseEntity.notFound().build();
+
+        }
+
+    }
+
+    @Then("the API should return a not found trainer response")
+    public void theAPIShouldReturnANotFoundTrainerResponse() {
+        Assertions.assertNotNull(responseEntity);
+        assertEquals(404, responseEntity.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
+
+    }
+
+
+    @Given("a trainer invalid username and updated  trainer details")
+    public void aTrainerInvalidUsernameAndUpdatedTrainerDetails() {
+        username = "invalid username ";
+        trainer = new Trainer();
+        TrainingType trainingType = new TrainingType();
+        trainingType.setTrainingTypeName("test");
+        trainer.setSpecialization(trainingType);
+        User user = new User();
+        user.setUserName("username");
+        trainer.setUser(user);
+    }
+
+    @When("the update invalid trainer profile request is sent")
+    public void theUpdateInvalidTrainerProfileRequestIsSent() {
+        try {
+            when(trainerService.updateTrainer(invalidUsername, trainer)).thenThrow(UserNotFoundException.class);
+            responseEntity = controller.getTrainerProfile(invalidUsername);
+        } catch (UserNotFoundException e) {
+            exception = e;
+            responseEntity = ResponseEntity.notFound().build();
+
+        }
+
+    }
+
+    @Then("the API should return a bad request")
+    public void theAPIShouldReturnABadRequest() {
+        Assertions.assertNotNull(responseEntity);
+        assertEquals(404, responseEntity.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
     }
 }

@@ -8,6 +8,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,8 +34,9 @@ public class TrainerWorkloadControllerSteps {
     private ResponseEntity<Void> responseEntity;
     private TrainerWorkloadRequest request;
 
+    private Exception exception;
 
-    public TrainerWorkloadControllerSteps(){
+    public TrainerWorkloadControllerSteps() {
         MockitoAnnotations.openMocks(this);
 
     }
@@ -71,6 +73,7 @@ public class TrainerWorkloadControllerSteps {
     public void theTrainerWorkloadShouldBeSuccessfullyUpdated() {
         assert responseEntity.getStatusCode() == HttpStatus.OK;
     }
+
     ///////////////////////////////////////////////////////////////////////////
     @Given("^an invalid trainer workload request is received$")
     public void anInvalidTrainerWorkloadRequestIsReceived() {
@@ -87,4 +90,30 @@ public class TrainerWorkloadControllerSteps {
         assert responseEntity.getStatusCode() == HttpStatus.BAD_REQUEST;
 
     }
+
+    @Given("an nullpoint username trainer workload request is received")
+    public void anNullpointUsernameTrainerWorkloadRequestIsReceived() {
+        request = null;
+    }
+
+    @When("the null point trainer send endpoint")
+    public void theNullPointTrainerSendEndpoint() {
+        try {
+            doThrow(NullPointerException.class).when(trainerWorkloadService).updateWorkload(request);
+            responseEntity = trainerWorkloadController.updateWorkload(request);
+        } catch (NullPointerException e) {
+            exception = e;
+            responseEntity = ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Then("the update should fail")
+    public void theUpdateShouldFail() {
+        Assertions.assertNotNull(responseEntity);
+        Assertions.assertEquals(400, responseEntity.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertTrue(exception instanceof NullPointerException);
+
+    }
+
 }

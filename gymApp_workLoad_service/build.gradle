@@ -84,26 +84,3 @@ dependencyManagement {
 	}
 }
 
-
-task createCucumberReportsDir {
-	doLast {
-		file('build/reports/cucumber').mkdirs()
-	}
-}
-task cucumberTest(type: Test) {
-	dependsOn createCucumberReportsDir
-	useJUnitPlatform()
-	include 'src/test/resources/scenario/*.feature'
-	systemProperty 'cucumber.junit.platform.naming.strategy', 'fixed'
-
-	// Форматирование вывода результатов в JSON файл
-	systemProperty 'cucumber.plugin', 'json:build/reports/cucumber/cucumber.json'
-}
-
-
-
-cucumberTest.dependsOn test
-
-jacocoTestReport {
-	dependsOn cucumberTest
-}

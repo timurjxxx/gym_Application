@@ -2,8 +2,10 @@ package steps;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gypApp_main.controller.TrainingController;
+import com.gypApp_main.exception.UserNotFoundException;
 import com.gypApp_main.model.*;
 import com.gypApp_main.service.TrainingService;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -15,9 +17,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TrainingControllerSteps {
 
@@ -38,6 +40,9 @@ public class TrainingControllerSteps {
     private String trainerUsername;
     private TrainingSearchCriteria traineeCriteria;
     private TrainingSearchCriteria trainerCriteria;
+    private UserNotFoundException exception;
+    private String invalidTrainingName;
+    private ResponseEntity<String > trainingsResponse;
 
     public TrainingControllerSteps() {
         MockitoAnnotations.openMocks(this);
@@ -93,7 +98,7 @@ public class TrainingControllerSteps {
 
     @When("the delete training request is sent")
     public void whenDeleteTrainingRequestSent() throws JsonProcessingException {
-       doNothing().when(trainingService).deleteTraining(existingTrainingName);
+        doNothing().when(trainingService).deleteTraining(existingTrainingName);
         deleteTrainingResponse = trainingController.deleteTraining(existingTrainingName);
     }
 
@@ -130,6 +135,96 @@ public class TrainingControllerSteps {
     public void thenTrainerTrainingsReturned() {
         Assertions.assertNotNull(trainerTrainingsResponse);
     }
-    ///////////////
+
+    @Given("invalid trainer username {string}")
+    public void invalidTrainerUsername(String invalidUsername) {
+        trainerUsername = invalidUsername;
+
+    }
+
+    @And("a criteria for invalid trainer trainings")
+    public void aCriteriaForInvalidTrainerTrainings() {
+        trainerCriteria = new TrainingSearchCriteria();
+    }
+
+    @When("the get invalid trainer trainings by criteria request is sent")
+    public void theGetInvalidTrainerTrainingsByCriteriaRequestIsSent() {
+
+        try {
+            when(trainingService.getTrainerTrainingsByCriteria(trainerUsername, trainerCriteria))
+                    .thenThrow(UserNotFoundException.class);
+            trainerTrainingsResponse = trainingController.getTrainerTrainingsByCriteria(trainerUsername, trainerCriteria);
+        } catch (UserNotFoundException e) {
+            exception = e;
+            trainerTrainingsResponse = ResponseEntity.notFound().build();
+
+        }
+    }
+
+    @Then("the API should return a not found training response")
+    public void theAPIShouldReturnANotFoundTrainingResponse() {
+        Assertions.assertNotNull(trainerTrainingsResponse);
+        assertEquals(404, trainerTrainingsResponse.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
+    }
+
+    @Given("invalid trainee username {string}")
+    public void invalidTraineeUsername(String invalidUsername) {
+        traineeUsername = invalidUsername;
+
+    }
+
+    @And("a criteria for invalid trainee trainings")
+    public void aCriteriaForInvalidTraineeTrainings() {
+        traineeCriteria = new TrainingSearchCriteria();
+
+    }
+
+    @When("the get invalid trainee trainings by criteria request is sent")
+    public void theGetInvalidTraineeTrainingsByCriteriaRequestIsSent() {
+        try {
+            when(trainingService.getTraineeTrainingsByCriteria(traineeUsername, traineeCriteria))
+                    .thenThrow(UserNotFoundException.class);
+            traineeTrainingsResponse = trainingController.getTraineeTrainingsByCriteria(traineeUsername, traineeCriteria);
+        } catch (UserNotFoundException e) {
+            exception = e;
+            traineeTrainingsResponse = ResponseEntity.notFound().build();
+
+        }
+    }
+
+    @Then("the API should return a not found trainee training response")
+    public void theAPIShouldReturnANotFoundTraineeTrainingResponse() {
+        Assertions.assertNotNull(traineeTrainingsResponse);
+        assertEquals(404, traineeTrainingsResponse.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
+    }
+
+    @Given("an invalid training name")
+    public void anInvalidTrainingName() {
+        invalidTrainingName = "invalid name";
+    }
+
+    @When("the delete invalid training request is sent")
+    public void theDeleteInvalidTrainingRequestIsSent() throws JsonProcessingException {
+        try {
+            doThrow(UserNotFoundException.class).when(trainingService).deleteTraining(invalidTrainingName);
+            deleteTrainingResponse = trainingController.deleteTraining(invalidTrainingName);
+        }catch (UserNotFoundException e){
+            exception = e;
+            deleteTrainingResponse = ResponseEntity.notFound().build();
+        }
+    }
+
+    @Then("the training should return not found")
+    public void theTrainingShouldReturnNotFound() {
+        Assertions.assertNotNull(deleteTrainingResponse);
+        assertEquals(404, deleteTrainingResponse.getStatusCodeValue());
+        Assertions.assertNotNull(exception);
+        Assertions.assertInstanceOf(UserNotFoundException.class, exception);
+    }
+
 
 }

@@ -9,3 +9,10 @@ Feature: Update Trainer Workload
     Given an invalid trainer workload request is received
     When the trainer workload is updated
     Then the update should fail with a bad request response
+
+
+
+  Scenario: NUll username trainer workload request
+    Given an nullpoint username trainer workload request is received
+    When the null point trainer send endpoint
+    Then the update should fail

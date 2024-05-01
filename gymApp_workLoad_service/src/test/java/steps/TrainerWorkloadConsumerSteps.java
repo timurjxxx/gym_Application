@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.exceptions.base.MockitoAssertionError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +45,8 @@ public class TrainerWorkloadConsumerSteps {
 
     private String invalidJsonRequest;
     private RuntimeException thrownException;
+    private Exception exception;
+    private ResponseEntity<Void> responseEntity;
 
     public TrainerWorkloadConsumerSteps() {
         MockitoAnnotations.openMocks(this);
